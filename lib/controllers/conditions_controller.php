@@ -17,6 +17,7 @@ class OsConditionsController extends OsController {
         $this->_vars();
         $this->vars['page_header'] = 'Conditions';
         $this->vars['conditions'] = $conditions;
+        $this->vars['disabledCustomer'] = OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login', 0);
         $this->format_render(__FUNCTION__);
     }
 
@@ -95,6 +96,25 @@ class OsConditionsController extends OsController {
         } else {
             $status = LATEPOINT_STATUS_ERROR;
             $response = __('Invalid Field ID', 'latepoint-conditions');
+        }
+        if($this->get_return_format() == 'json') {
+            $this->send_json(['status' => $status, 'message' => $response]);
+        }
+    }
+
+    public function disabled_customer() {
+        if(isset($this->params['disabled_customer_login'])) {
+            $val = (int)$this->params['disabled_customer_login'];
+            if(OsSettingsHelper::save_setting_by_name('latepoint-disabled_customer_login', $val)) {
+                $status = LATEPOINT_STATUS_SUCCESS;
+                $response = __('Saved', 'latepoint-conditions');
+            } else {
+                $status = LATEPOINT_STATUS_ERROR;
+                $response = __('Error', 'latepoint-conditions');
+            }
+        } else {
+            $status = LATEPOINT_STATUS_ERROR;
+            $response = __('Invalid Params', 'latepoint-conditions');
         }
         if($this->get_return_format() == 'json') {
             $this->send_json(['status' => $status, 'message' => $response]);

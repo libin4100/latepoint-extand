@@ -33,11 +33,6 @@ final class LatePointExt {
 
     public function hooks() {
         add_action('latepoint_includes', [$this, 'includes']);
-        //add_action('init', [ $this, 'init'], 0);
-
-        //add_action('latepoint_top_bar_after_actions', [$this, 'add_locations_selector'] );
-        //add_action('latepoint_top_bar_mobile_after_user', [$this, 'add_locations_selector'] );
-        //add_action('latepoint_locations_index', [$this, 'output_locations_index'] );
         add_action('latepoint_load_step', [$this, 'loadStep'], 10, 3);
         add_action('latepoint_process_step', [$this, 'processStep'], 10, 2);
         add_action('latepoint_admin_enqueue_scripts', [$this, 'adminScripts']);
@@ -45,7 +40,6 @@ final class LatePointExt {
         add_action('latepoint_booking_quick_edit_form_after',[$this, 'outputQuickForm']);
 
         add_filter('latepoint_installed_addons', [$this, 'registerAddon']);
-        //add_filter('latepoint_locations_addon_installed', [$this, 'show_locations']);
         add_filter('latepoint_side_menu', [$this, 'addMenu']);
 
         register_activation_hook(__FILE__, [$this, 'onActivate']);
@@ -57,6 +51,10 @@ final class LatePointExt {
     }
 
     public function loadStep($stepName, $bookingObject, $format = 'json') {
+        if($stepName == 'contact') {
+            if(OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login'))
+                OsAuthHelper::logout_customer();
+        }
         if($stepName == 'confirmation') {
             $defaultAgents = OsAgentHelper::get_agents_for_service_and_location($bookingObject->service_id, $bookingObject->location_id);
             $availableAgents = [];
