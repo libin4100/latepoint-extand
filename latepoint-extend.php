@@ -38,6 +38,8 @@ final class LatePointExt {
         add_action('latepoint_admin_enqueue_scripts', [$this, 'adminScripts']);
         add_action('latepoint_model_save', [$this, 'saveAgent']);
         add_action('latepoint_booking_quick_edit_form_after',[$this, 'outputQuickForm']);
+        add_action('latepoint_step_confirmation_head_info_before',[$this, 'confirmationInfoBefore']);
+        add_action('latepoint_step_confirmation_head_info_after',[$this, 'confirmationInfoAfter']);
 
         add_filter('latepoint_installed_addons', [$this, 'registerAddon']);
         add_filter('latepoint_side_menu', [$this, 'addMenu']);
@@ -146,6 +148,16 @@ final class LatePointExt {
             }
         }
         echo '</div>';
+    }
+
+    public function confirmationInfoBefore($booking) {
+    }
+
+    public function confirmationInfoAfter($booking) {
+        $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
+        if($button && $button->text && $button->link) {
+            echo '<a href="' . $button->link . '" target="_blank" class="latepoint-btn latepoint-btn-primary" data-label="' . $button->text . '"><span>' . $button->text . '</span></a>';
+        }
     }
 
     public function adminScripts() {
