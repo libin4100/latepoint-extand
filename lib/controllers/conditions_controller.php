@@ -18,7 +18,7 @@ class OsConditionsController extends OsController {
         $this->vars['page_header'] = 'Conditions';
         $this->vars['conditions'] = $conditions;
         $this->vars['disabledCustomer'] = OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login', 0);
-        $this->vars['buttonConfirm'] = OsSettingsHelper::get_settings_value('latepoint-button_confirmation', []);
+        $this->vars['buttonConfirm'] = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
         $this->format_render(__FUNCTION__);
     }
 

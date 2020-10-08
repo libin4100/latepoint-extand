@@ -36,13 +36,15 @@ final class LatePointExt {
         add_action('latepoint_load_step', [$this, 'loadStep'], 10, 3);
         add_action('latepoint_process_step', [$this, 'processStep'], 10, 2);
         add_action('latepoint_admin_enqueue_scripts', [$this, 'adminScripts']);
+        add_action('latepoint_wp_enqueue_scripts', [$this, 'frontScripts']);
         add_action('latepoint_model_save', [$this, 'saveAgent']);
         add_action('latepoint_booking_quick_edit_form_after',[$this, 'outputQuickForm']);
         add_action('latepoint_step_confirmation_head_info_before',[$this, 'confirmationInfoBefore']);
-        add_action('latepoint_step_confirmation_head_info_after',[$this, 'confirmationInfoAfter']);
+        add_action('latepoint_step_confirmation_before',[$this, 'confirmationInfoAfter']);
 
         add_filter('latepoint_installed_addons', [$this, 'registerAddon']);
         add_filter('latepoint_side_menu', [$this, 'addMenu']);
+        add_filter('latepoint_step_show_next_btn_rules', [$this, 'addNextBtn'], 10, 2);
 
         register_activation_hook(__FILE__, [$this, 'onActivate']);
         register_deactivation_hook(__FILE__, [$this, 'onDeactivate']);
@@ -58,8 +60,7 @@ final class LatePointExt {
                 OsAuthHelper::logout_customer();
         }
         if($stepName == 'confirmation') {
-            $defaultAgents = OsAgentHelper::get_agents_for_service_and_location($bookingObject->service_id, $bookingObject->location_id);
-            $availableAgents = [];
+            $defaultAgents = OsAgentHelper::get_agents_for_service_and_location($bookingObject->service_id, $bookingObject->location_id); $availableAgents = [];
             if($bookingObject->start_date && $bookingObject->start_time) {
                 foreach($defaultAgents as $agent) {
                     if(OsAgentHelper::is_agent_available_on($agent,
@@ -156,13 +157,18 @@ final class LatePointExt {
     public function confirmationInfoAfter($booking) {
         $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
         if($button && $button->text && $button->link) {
-            echo '<a href="' . $button->link . '" target="_blank" class="latepoint-btn latepoint-btn-primary" data-label="' . $button->text . '"><span>' . $button->text . '</span></a>';
+            echo '<div class="latepoint-footer request-move"><a href="' . $button->link . '"' . ((isset($button->target) && $button->target == '_blank') ? ' target="_blank"' : '') . ' class="latepoint-btn latepoint-btn-primary latepoint-next-btn" data-label="' . $button->text . '"><span>' . $button->text . '</span></a></div>';
         }
     }
 
     public function adminScripts() {
         $jsFolder = plugin_dir_url( __FILE__ ) . 'public/js/';
         wp_enqueue_script('latepoint-conditions',  $jsFolder . 'admin.js', array('jquery'), $this->version);
+    }
+
+    public function frontScripts() {
+        $jsFolder = plugin_dir_url( __FILE__ ) . 'public/js/';
+        wp_enqueue_script('latepoint-conditions',  $jsFolder . 'front.js', array('jquery'), $this->version);
     }
 
     public function registerAddon($installedAddons) {
@@ -175,6 +181,15 @@ final class LatePointExt {
         $menus[] = ['id' => 'condition_filter', 'label' => __('Conditions', 'latepoint-extend'), 'icon' => 'latepoint-icon latepoint-icon-layers', 'link' => OsRouterHelper::build_link(['conditions', 'index'])];
         return $menus;
     }
+
+    public function addNextBtn($rules, $step) {
+        $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
+        if($button && $button->text && $button->link) {
+            $rules['confirmation'] = true;
+            return $rules;
+        }
+    }
+
     public function onDeactivate() {
     }
 

@@ -23,10 +23,13 @@
 		<div class="os-custom-field-form-params">
 			<div class="os-row">
 				<div class="os-col-12">
-					<?php echo OsFormHelper::text_field('text', __('Button Text', 'latepoint-conditions'), $buttonConfirm['text'], ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-text']); ?>
+					<?php echo OsFormHelper::text_field('text', __('Button Text', 'latepoint-conditions'), $buttonConfirm->text, ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-text']); ?>
 				</div>
 				<div class="os-col-12">
-					<?php echo OsFormHelper::text_field('link', __('Button Link', 'latepoint-conditions'), $buttonConfirm['link'], ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-link']); ?>
+					<?php echo OsFormHelper::text_field('link', __('Button Link', 'latepoint-conditions'), $buttonConfirm->link, ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-link']); ?>
+				</div>
+				<div class="os-col-6">
+					<?php echo OsFormHelper::select_field('target', __('Open Link', 'latepoint-conditions'), ['_self' => __('Current Page', 'latepoint-conditions'), '_blank' => __('New Page', 'latepoint-conditions')], $buttonConfirm->target, ['id' => 'confirmation-button-target']); ?>
 				</div>
             </div>
             <button type="submit" class="os-custom-field-save-btn latepoint-btn latepoint-btn-primary"><span><?php _e('Save', 'latepoint-conditions'); ?></span></button>
