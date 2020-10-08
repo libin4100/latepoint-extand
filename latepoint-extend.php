@@ -156,8 +156,9 @@ final class LatePointExt {
 
     public function confirmationInfoAfter($booking) {
         $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
-        if($button && $button->text && $button->link) {
-            echo '<div class="latepoint-footer request-move"><a href="' . $button->link . '"' . ((isset($button->target) && $button->target == '_blank') ? ' target="_blank"' : '') . ' class="latepoint-btn latepoint-btn-primary latepoint-next-btn" data-label="' . $button->text . '"><span>' . $button->text . '</span></a></div>';
+        if($button && $button->link) {
+            $text = (isset($button->text) && $button->text) ? $button->text : __('Next Step', 'latepoint');
+            echo '<div class="latepoint-footer request-move"><a href="' . $button->link . '"' . ((isset($button->target) && $button->target == '_blank') ? ' target="_blank"' : '') . ' class="latepoint-btn latepoint-btn-primary latepoint-next-btn" data-label="' . $text . '"><span>' . $text . '</span> <i class="latepoint-icon-arrow-2-right"></i></a></div>';
         }
     }
 
