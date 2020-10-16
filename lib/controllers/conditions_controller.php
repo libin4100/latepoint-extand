@@ -18,6 +18,7 @@ class OsConditionsController extends OsController {
         $this->vars['page_header'] = 'Conditions';
         $this->vars['conditions'] = $conditions;
         $this->vars['disabledCustomer'] = OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login', 0);
+        $this->vars['allowShortcode'] = OsSettingsHelper::get_settings_value('latepoint-allow_shortcode_custom_fields', 0);
         $this->vars['buttonConfirm'] = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
         $this->format_render(__FUNCTION__);
     }
@@ -103,15 +104,16 @@ class OsConditionsController extends OsController {
         }
     }
 
-    public function disabled_customer() {
-        if(isset($this->params['disabled_customer_login'])) {
-            $val = (int)$this->params['disabled_customer_login'];
-            if(OsSettingsHelper::save_setting_by_name('latepoint-disabled_customer_login', $val)) {
-                $status = LATEPOINT_STATUS_SUCCESS;
-                $response = __('Saved', 'latepoint-conditions');
-            } else {
-                $status = LATEPOINT_STATUS_ERROR;
-                $response = __('Error', 'latepoint-conditions');
+    public function settings() {
+        if($this->params && count($this->params)) {
+            foreach($this->params as $k => $v) {
+                if(OsSettingsHelper::save_setting_by_name('latepoint-' . $k, $v)) {
+                    $status = LATEPOINT_STATUS_SUCCESS;
+                    $response = __('Saved', 'latepoint-conditions');
+                } else {
+                    $status = LATEPOINT_STATUS_ERROR;
+                    $response = __('Error', 'latepoint-conditions');
+                }
             }
         } else {
             $status = LATEPOINT_STATUS_ERROR;

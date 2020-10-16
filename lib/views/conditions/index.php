@@ -1,10 +1,20 @@
 <div class="os-form-sub-header"><h3><?php _e('Disabled Customer Login', 'latepoint-extends'); ?></h3></div>
-<div class="os-default-fields" data-route="<?php echo OsRouterHelper::build_route_name('conditions', 'disabled_customer') ?>">
+<div class="os-default-fields" data-route="<?php echo OsRouterHelper::build_route_name('conditions', 'settings') ?>">
 	<form>
 		<div class="os-default-field <?php echo $disabledCustomer ? '' : 'is-disabled'; ?>">
             <div class="os-toggler<?php echo $disabledCustomer ? '' : ' off' ?>" data-for="disabled_customer_login"><div class="toggler-rail"><div class="toggler-pill"></div></div></div>
             <?php echo OsFormHelper::hidden_field('disabled_customer_login', $disabledCustomer); ?>
 			<div class="os-field-name"><?php _e('Disabled Customer Login', 'latepoint-extends'); ?></div>
+		</div>
+	</form>
+</div>
+<div class="os-form-sub-header"><h3><?php _e('Allow Shortcode for Custom Fields', 'latepoint-extends'); ?></h3></div>
+<div class="os-default-fields" data-route="<?php echo OsRouterHelper::build_route_name('conditions', 'settings') ?>">
+	<form>
+		<div class="os-default-field <?php echo $allowShortcode ? '' : 'is-disabled'; ?>">
+            <div class="os-toggler<?php echo $allowShortcode ? '' : ' off' ?>" data-for="allow_shortcode_custom_fields"><div class="toggler-rail"><div class="toggler-pill"></div></div></div>
+            <?php echo OsFormHelper::hidden_field('allow_shortcode_custom_fields', $allowShortcode); ?>
+			<div class="os-field-name"><?php _e('Allow Shortcode for Custom Fields', 'latepoint-extends'); ?></div>
 		</div>
 	</form>
 </div>

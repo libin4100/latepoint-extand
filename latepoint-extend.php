@@ -33,7 +33,7 @@ final class LatePointExt {
 
     public function hooks() {
         add_action('latepoint_includes', [$this, 'includes']);
-        add_action('latepoint_load_step', [$this, 'loadStep'], 10, 3);
+        add_action('latepoint_load_step', [$this, 'loadStep'], 5, 3);
         add_action('latepoint_process_step', [$this, 'processStep'], 10, 2);
         add_action('latepoint_admin_enqueue_scripts', [$this, 'adminScripts']);
         add_action('latepoint_wp_enqueue_scripts', [$this, 'frontScripts']);
@@ -58,6 +58,34 @@ final class LatePointExt {
         if($stepName == 'contact') {
             if(OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login'))
                 OsAuthHelper::logout_customer();
+        }
+        if($stepName == 'custom_fields_for_booking') {
+            if(OsSettingsHelper::get_settings_value('latepoint-allow_shortcode_custom_fields')) {
+                $customFields = OsSettingsHelper::get_settings_value('custom_fields_for_booking', false);
+                $fields = [];
+                if($customFields) {
+                    $values = json_decode(do_shortcode($customFields), true);
+                    if($values) {
+                        foreach($values as $id => $val) {
+                            if(!isset($val['visibility']) || $val['visibility'] == 'public') $fields[$id] = $val;
+                        }
+                    }
+                }
+
+                $custom_fields_controller = new OsCustomFieldsController();
+                $custom_fields_controller->vars['custom_fields_for_booking'] = $fields;
+                $custom_fields_controller->vars['booking'] = $bookingObject;
+                $custom_fields_controller->vars['current_step'] = $stepName;
+                $custom_fields_controller->set_layout('none');
+                $custom_fields_controller->set_return_format($format);
+                $custom_fields_controller->format_render('_step_custom_fields_for_booking', [], [
+                    'step_name'         => $step_name, 
+                    'show_next_btn'     => OsStepsHelper::can_step_show_next_btn($step_name), 
+                    'show_prev_btn'     => OsStepsHelper::can_step_show_prev_btn($step_name), 
+                    'is_first_step'     => OsStepsHelper::is_first_step($step_name), 
+                    'is_last_step'      => OsStepsHelper::is_last_step($step_name), 
+                    'is_pre_last_step'  => OsStepsHelper::is_pre_last_step($step_name)]);
+            }
         }
         if($stepName == 'confirmation') {
             $defaultAgents = OsAgentHelper::get_agents_for_service_and_location($bookingObject->service_id, $bookingObject->location_id); $availableAgents = [];
