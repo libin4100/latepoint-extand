@@ -13,13 +13,14 @@ class OsConditionsController extends OsController {
 
     public function index() {
         $conditions = $this->_getFromSettings();
+        $buttons = $this->_getFromButtonSettings();
 
         $this->_vars();
         $this->vars['page_header'] = 'Conditions';
         $this->vars['conditions'] = $conditions;
         $this->vars['disabledCustomer'] = OsSettingsHelper::get_settings_value('latepoint-disabled_customer_login', 0);
         $this->vars['allowShortcode'] = OsSettingsHelper::get_settings_value('latepoint-allow_shortcode_custom_fields', 0);
-        $this->vars['buttonConfirm'] = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
+        $this->vars['buttonConfirms'] = $buttons;
         $this->format_render(__FUNCTION__);
     }
 
@@ -31,6 +32,18 @@ class OsConditionsController extends OsController {
             'type' => '', 
             'placeholder' => '',
             'agents' => []
+        ];
+        $this->set_layout('none');
+        $this->format_render(__FUNCTION__);
+    }
+
+    public function new_form_button() {
+        $this->vars['buttonConfirm'] = [
+            'id' => $this->_genId($this->_getFromButtonSettings), 
+            'label' => '', 
+            'link' => '', 
+            'target' => '',
+            'referer' => ''
         ];
         $this->set_layout('none');
         $this->format_render(__FUNCTION__);
@@ -78,6 +91,30 @@ class OsConditionsController extends OsController {
         }
     }
 
+    public function confirmation() {
+        if($buttonConfirm = $this->params['button']) {
+            $buttons = $this->_getFromButtonSettings();
+            if(!isset($buttonConfirm['id']) || !$buttonConfirm['id'])
+                $buttonConfirm['id'] = $this->_genId($buttons);
+
+            $buttons[$buttonConfirm['id']] = $buttonConfirm;
+
+            if(OsSettingsHelper::save_setting_by_name('latepoint-button_confirmation', json_encode($buttons))) {
+                $status = LATEPOINT_STATUS_SUCCESS;
+                $response = __('Saved', 'latepoint-conditions');
+            } else {
+                $status = LATEPOINT_STATUS_ERROR;
+                $response = __('Error', 'latepoint-conditions');
+            }
+        } else {
+            $status = LATEPOINT_STATUS_ERROR;
+            $response = __('Invalid Params', 'latepoint-conditions');
+        }
+        if($this->get_return_format() == 'json') {
+            $this->send_json(['status' => $status, 'message' => $response]);
+        }
+    }
+
     public function delete() {
         if(isset($this->params['id']) && !empty($this->params['id'])) {
             $conditions = $this->_getFromSettings();
@@ -90,6 +127,32 @@ class OsConditionsController extends OsController {
                 } else {
                     $status = LATEPOINT_STATUS_ERROR;
                     $response = __('Error Removing Condition', 'latepoint-conditions');
+                }
+            } else {
+                $status = LATEPOINT_STATUS_ERROR;
+                $response = __('Invalid Field ID', 'latepoint-conditions');
+            }
+        } else {
+            $status = LATEPOINT_STATUS_ERROR;
+            $response = __('Invalid Field ID', 'latepoint-conditions');
+        }
+        if($this->get_return_format() == 'json') {
+            $this->send_json(['status' => $status, 'message' => $response]);
+        }
+    }
+
+    public function delete_button() {
+        if(isset($this->params['id']) && !empty($this->params['id'])) {
+            $conditions = $this->_getFromButtonSettings();
+            if(isset($conditions[$this->params['id']])) {
+                unset($conditions[$this->params['id']]);
+                
+                if(OsSettingsHelper::save_setting_by_name('latepoint-button_confirmation', json_encode($conditions))) {
+                    $status = LATEPOINT_STATUS_SUCCESS;
+                    $response = __('Button Removed', 'latepoint-conditions');
+                } else {
+                    $status = LATEPOINT_STATUS_ERROR;
+                    $response = __('Error Removing Button', 'latepoint-conditions');
                 }
             } else {
                 $status = LATEPOINT_STATUS_ERROR;
@@ -124,24 +187,6 @@ class OsConditionsController extends OsController {
         }
     }
 
-    public function confirmation() {
-        if($this->params['text'] && $this->params['link']) {
-            if(OsSettingsHelper::save_setting_by_name('latepoint-button_confirmation', json_encode($this->params))) {
-                $status = LATEPOINT_STATUS_SUCCESS;
-                $response = __('Saved', 'latepoint-conditions');
-            } else {
-                $status = LATEPOINT_STATUS_ERROR;
-                $response = __('Error', 'latepoint-conditions');
-            }
-        } else {
-            $status = LATEPOINT_STATUS_ERROR;
-            $response = __('Invalid Params', 'latepoint-conditions');
-        }
-        if($this->get_return_format() == 'json') {
-            $this->send_json(['status' => $status, 'message' => $response]);
-        }
-    }
-
     protected function _vars() {
         $this->vars['custom_fields_for_booking'] = OsCustomFieldsHelper::get_custom_fields_arr('booking', 'customer');
 
@@ -152,6 +197,15 @@ class OsConditionsController extends OsController {
     protected function _getFromSettings() {
         $conditions = [];
         $setting = OsSettingsHelper::get_settings_value('latepoint-conditions', false);
+        if($setting) {
+            $conditions = json_decode($setting, true);
+        }
+        return $conditions;
+    }
+
+    protected function _getFromButtonSettings() {
+        $conditions = [];
+        $setting = OsSettingsHelper::get_settings_value('latepoint-button_confirmation', false);
         if($setting) {
             $conditions = json_decode($setting, true);
         }

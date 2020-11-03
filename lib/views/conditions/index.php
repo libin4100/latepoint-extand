@@ -8,6 +8,7 @@
 		</div>
 	</form>
 </div>
+
 <div class="os-form-sub-header"><h3><?php _e('Allow Shortcode for Custom Fields', 'latepoint-extends'); ?></h3></div>
 <div class="os-default-fields" data-route="<?php echo OsRouterHelper::build_route_name('conditions', 'settings') ?>">
 	<form>
@@ -18,34 +19,18 @@
 		</div>
 	</form>
 </div>
+
 <div class="os-form-sub-header"><h3><?php _e('Button on Confirmation', 'latepoint-extends'); ?></h3></div>
-<div class="os-conditions-w os-conditions-ordering-w">
-<form data-os-custom-field-id="button-confirmation" 
-    data-os-action="<?php echo OsRouterHelper::build_route_name('conditions', 'confirmation'); ?>" 
-    data-os-after-call="latepoint_condition_saved" 
-    class="os-custom-field-form">
-	<div class="os-custom-field-form-i">
-		<div class="os-custom-field-form-info">
-			<div class="os-custom-field-drag"></div>
-			<div class="os-name"><?php echo __('Button on Confirmation', 'latepoint-conditions'); ?></div>
-			<div class="os-custom-field-edit-btn"><i class="latepoint-icon latepoint-icon-edit-3"></i></div>
-		</div>
-		<div class="os-custom-field-form-params">
-			<div class="os-row">
-				<div class="os-col-12">
-					<?php echo OsFormHelper::text_field('text', __('Button Text', 'latepoint-conditions'), $buttonConfirm->text, ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-text']); ?>
-				</div>
-				<div class="os-col-12">
-					<?php echo OsFormHelper::text_field('link', __('Button Link', 'latepoint-conditions'), $buttonConfirm->link, ['class' => 'os-custom-field-name-input', 'id' => 'confirmation-button-link']); ?>
-				</div>
-				<div class="os-col-6">
-					<?php echo OsFormHelper::select_field('target', __('Open Link', 'latepoint-conditions'), ['_self' => __('Current Page', 'latepoint-conditions'), '_blank' => __('New Page', 'latepoint-conditions')], $buttonConfirm->target, ['id' => 'confirmation-button-target']); ?>
-				</div>
-            </div>
-            <button type="submit" class="os-custom-field-save-btn latepoint-btn latepoint-btn-primary"><span><?php _e('Save', 'latepoint-conditions'); ?></span></button>
-        </div>
+<div class="os-conditions-ordering-w os-conditions-button-w">
+    <?php foreach($buttonConfirms as $buttonConfirm): ?>
+        <?php include('_form_button.php'); ?>
+    <?php endforeach; ?>
+</div>
+<div class="os-add-box add-condition-box add-condition-trigger" data-os-action="<?php echo OsRouterHelper::build_route_name('conditions', 'new_form_button'); ?>" data-os-output-target-do="append" data-os-output-target=".os-conditions-button-w">
+    <div class="add-box-graphic-w">
+        <div class="add-box-plus"><i class="latepoint-icon latepoint-icon-plus4"></i></div>
     </div>
-</form>
+    <div class="add-box-label"><?php _e('Add Button', 'latepoint-conditions'); ?></div>
 </div>
 
 <div class="os-form-sub-header"><h3><?php _e('Conditions', 'latepoint-extends'); ?></h3></div>

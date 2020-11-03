@@ -79,12 +79,12 @@ final class LatePointExt {
                 $custom_fields_controller->set_layout('none');
                 $custom_fields_controller->set_return_format($format);
                 $custom_fields_controller->format_render('_step_custom_fields_for_booking', [], [
-                    'step_name'         => $step_name, 
-                    'show_next_btn'     => OsStepsHelper::can_step_show_next_btn($step_name), 
-                    'show_prev_btn'     => OsStepsHelper::can_step_show_prev_btn($step_name), 
-                    'is_first_step'     => OsStepsHelper::is_first_step($step_name), 
-                    'is_last_step'      => OsStepsHelper::is_last_step($step_name), 
-                    'is_pre_last_step'  => OsStepsHelper::is_pre_last_step($step_name)]);
+                    'step_name'         => $stepName, 
+                    'show_next_btn'     => OsStepsHelper::can_step_show_next_btn($stepName), 
+                    'show_prev_btn'     => OsStepsHelper::can_step_show_prev_btn($stepName), 
+                    'is_first_step'     => OsStepsHelper::is_first_step($stepName), 
+                    'is_last_step'      => OsStepsHelper::is_last_step($stepName), 
+                    'is_pre_last_step'  => OsStepsHelper::is_pre_last_step($stepName)]);
             }
         }
         if($stepName == 'confirmation') {
@@ -183,10 +183,14 @@ final class LatePointExt {
     }
 
     public function confirmationInfoAfter($booking) {
-        $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
-        if($button && $button->link) {
-            $text = (isset($button->text) && $button->text) ? $button->text : __('Next Step', 'latepoint');
-            echo '<div class="latepoint-footer request-move"><a href="' . $button->link . '"' . ((isset($button->target) && $button->target == '_blank') ? ' target="_blank"' : '') . ' class="latepoint-btn latepoint-btn-primary latepoint-next-btn" data-label="' . $text . '"><span>' . $text . '</span> <i class="latepoint-icon-arrow-2-right"></i></a></div>';
+        $buttons = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
+        if($buttons && count($buttons)) {
+            foreach($buttons as $button) {
+                if($button->referer && $button->referer == wp_get_referer()) {
+                    $text = (isset($button->text) && $button->text) ? $button->text : __('Next Step', 'latepoint');
+                    echo '<div class="latepoint-footer request-move"><a href="' . $button->link . '"' . ((isset($button->target) && $button->target == '_blank') ? ' target="_blank"' : '') . ' class="latepoint-btn latepoint-btn-primary latepoint-next-btn" data-label="' . $text . '"><span>' . $text . '</span> <i class="latepoint-icon-arrow-2-right"></i></a></div>';
+                }
+            }
         }
     }
 
@@ -212,11 +216,13 @@ final class LatePointExt {
     }
 
     public function addNextBtn($rules, $step) {
-        $button = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
-        if($button && $button->text && $button->link) {
-            $rules['confirmation'] = true;
-            return $rules;
+        $buttons = json_decode(OsSettingsHelper::get_settings_value('latepoint-button_confirmation', '[]'));
+        foreach($buttons as $button) {
+            if($button->referer && $button->referer == wp_get_referer()) {
+                $rules['confirmation'] = true;
+            }
         }
+        return $rules;
     }
 
     public function onDeactivate() {
