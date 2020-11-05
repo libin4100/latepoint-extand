@@ -94,6 +94,9 @@ class OsConditionsController extends OsController {
     public function confirmation() {
         if($buttonConfirm = $this->params['button']) {
             $buttons = $this->_getFromButtonSettings();
+            foreach($buttons as $i => $button) {
+                if(!isset($button['id'])) unset($buttons[$i]);
+			}
             if(!isset($buttonConfirm['id']) || !$buttonConfirm['id'])
                 $buttonConfirm['id'] = $this->_genId($buttons);
 
